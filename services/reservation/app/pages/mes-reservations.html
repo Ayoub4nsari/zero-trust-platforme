@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mes réservations</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="bar">
+      <span id="whoami"></span>
+      <span>
+        <a href="/app/reservation">Nouvelle réservation</a>
+        <button id="logout" type="button" class="secondary">Se déconnecter</button>
+      </span>
+    </div>
+
+    <h1>Mes réservations</h1>
+    <table>
+      <thead><tr><th>Nom</th><th>Date</th><th>Chambre</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="empty" hidden>Aucune réservation pour le moment.</p>
+  </main>
+  <script src="/static/common.js"></script>
+  <script src="/static/mine.js"></script>
+</body>
+</html>

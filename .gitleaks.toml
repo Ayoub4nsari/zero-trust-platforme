@@ -1,0 +1,8 @@
+title = "zero-trust-platforme"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fichiers d'exemple sans secret"
+paths = ['''\.env\.example$''']

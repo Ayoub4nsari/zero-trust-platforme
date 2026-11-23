@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nouvelle réservation</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <div class="bar">
+      <span id="whoami"></span>
+      <span>
+        <a href="/app/mes-reservations">Mes réservations</a>
+        <button id="logout" type="button" class="secondary">Se déconnecter</button>
+      </span>
+    </div>
+
+    <h1>Nouvelle réservation</h1>
+    <form id="reserve-form">
+      <label>Nom
+        <input id="name" required maxlength="100">
+      </label>
+      <label>Chambre
+        <select id="room" required>
+          <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option>
+        </select>
+      </label>
+      <label>Date
+        <input id="date" type="date" required>
+      </label>
+      <button type="submit">Réserver</button>
+      <p id="error" class="error" role="alert"></p>
+    </form>
+
+    <div id="confirmation" class="confirmation" hidden>
+      <h3 id="confirm-title"></h3>
+      <p id="confirm-message"></p>
+      <dl>
+        <dt>Référence</dt><dd id="c-id"></dd>
+        <dt>Nom</dt><dd id="c-name"></dd>
+        <dt>Chambre</dt><dd id="c-room"></dd>
+        <dt>Date</dt><dd id="c-date"></dd>
+        <dt>Notification</dt><dd id="c-notif"></dd>
+      </dl>
+      <p><a href="/app/mes-reservations">Voir mes réservations →</a></p>
+    </div>
+  </main>
+  <script src="/static/common.js"></script>
+  <script src="/static/reserve.js"></script>
+</body>
+</html>

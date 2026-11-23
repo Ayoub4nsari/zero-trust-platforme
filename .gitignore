@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+certs/
+secrets/
+*.pem
+*.key
+.vagrant/
+caddy-root.crt
+docker-compose.debug.yml

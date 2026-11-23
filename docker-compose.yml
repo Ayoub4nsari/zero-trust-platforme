@@ -1,0 +1,168 @@
+services:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: http://keycloak:8080
+      RESERVATION_CLIENT_SECRET: ${RESERVATION_CLIENT_SECRET}
+      WRONG_SCOPE_CLIENT_SECRET: ${WRONG_SCOPE_CLIENT_SECRET}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD}
+      REGISTRATION_CLIENT_SECRET: ${REGISTRATION_CLIENT_SECRET}
+    volumes:
+      - ./keycloak/realm-zerotrust.json:/opt/keycloak/data/import/realm-zerotrust.json:ro
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    profiles: ["public"]
+    command: tunnel --no-autoupdate --url https://caddy:443 --no-tls-verify --http-host-header localhost --origin-server-name localhost
+    depends_on:
+      - caddy
+    networks:
+      - frontend
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  caddy:
+    image: caddy:2.8
+    container_name: caddy
+    ports:
+      - "8443:443"
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - reservation
+    networks:
+      - frontend
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+
+  reservation:
+    build:
+      context: ./services/reservation
+    container_name: reservation-service
+    expose:
+      - "8001"
+    environment:
+      NOTIFICATION_URL: https://notification:8002
+      OIDC_TOKEN_URL: http://keycloak:8080/realms/zerotrust/protocol/openid-connect/token
+      OIDC_CLIENT_ID: reservation-service
+      OIDC_CLIENT_SECRET_FILE: /run/secrets/reservation_client_secret
+      TLS_CA: /run/secrets/ca_cert
+      TLS_CERT: /run/secrets/reservation_cert
+      TLS_KEY: /run/secrets/reservation_key
+      OIDC_ISSUER: http://keycloak:8080/realms/zerotrust
+      OIDC_JWKS_URL: http://keycloak:8080/realms/zerotrust/protocol/openid-connect/certs
+      OIDC_AUDIENCE: reservation
+      ALLOWED_CLIENT_IDS: reservation-web
+      REGISTRATION_CLIENT_SECRET_FILE: /run/secrets/registration_client_secret
+      KEYCLOAK_USERS_URL: http://keycloak:8080/admin/realms/zerotrust/users
+    secrets:
+      - reservation_client_secret
+      - ca_cert
+      - reservation_cert
+      - reservation_key
+      - registration_client_secret
+    depends_on:
+      notification:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - frontend
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  notification:
+    build:
+      context: ./services/notification
+    container_name: notification-service
+    expose:
+      - "8002"
+    environment:
+      OIDC_ISSUER: http://keycloak:8080/realms/zerotrust
+      OIDC_JWKS_URL: http://keycloak:8080/realms/zerotrust/protocol/openid-connect/certs
+      OIDC_AUDIENCE: notification
+      ALLOWED_CLIENT_IDS: reservation-service
+    secrets:
+      - ca_cert
+      - notification_cert
+      - notification_key
+    depends_on:
+      - keycloak
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket; socket.create_connection(('localhost', 8002), 3).close()"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+secrets:
+  reservation_client_secret:
+    file: ./secrets/reservation_client_secret
+  ca_cert:
+    file: ./certs/ca.crt
+  notification_cert:
+    file: ./certs/notification.crt
+  notification_key:
+    file: ./certs/notification.key
+  reservation_cert:
+    file: ./certs/reservation.crt
+  reservation_key:
+    file: ./certs/reservation.key
+  registration_client_secret:
+    file: ./secrets/registration_client_secret

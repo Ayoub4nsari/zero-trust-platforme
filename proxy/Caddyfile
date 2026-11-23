@@ -1,0 +1,9 @@
+localhost {
+	tls internal
+	reverse_proxy reservation:8001
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}
