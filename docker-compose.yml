@@ -61,6 +61,7 @@ services:
       - "8001"
     environment:
       NOTIFICATION_URL: https://notification:8002
+            # checkov:skip=CKV_SECRET_6: URL de configuration, pas un secret (le secret client est dans un Docker secret)
       OIDC_TOKEN_URL: http://keycloak:8080/realms/zerotrust/protocol/openid-connect/token
       OIDC_CLIENT_ID: reservation-service
       OIDC_CLIENT_SECRET_FILE: /run/secrets/reservation_client_secret
