@@ -1,0 +1,7 @@
+quiet: true
+compact: true
+skip-path:
+  - services/reservation/target
+  - services/notification/target
+  - .vagrant
+  - .github/modernize

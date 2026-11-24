@@ -1,0 +1,4 @@
+# Spring Framework 6.2.x : correctif seulement en 7.0.x (Spring Boot 4).
+# XsltView et SSE avec rendu de vue ne sont pas utilisés par ces services.
+CVE-2026-47884 exp:2027-02-01
+CVE-2026-47890 exp:2027-02-01

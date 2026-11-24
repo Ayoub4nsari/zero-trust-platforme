@@ -51,8 +51,10 @@ jobs:
         run: |
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD/.trivyignore:/.trivyignore:ro" \
             aquasec/trivy:0.56.2 image --no-progress --scanners vuln \
-            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
+            --severity HIGH,CRITICAL --ignore-unfixed \
+            --ignorefile /.trivyignore --exit-code 1 \
             zt-${{ matrix.service }}:${{ github.sha }}
 
   publish:
