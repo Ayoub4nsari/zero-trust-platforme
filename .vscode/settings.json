@@ -1,1 +1,7 @@
-{ "files.eol": "\n" }
+
+
+{
+    "files.eol": "\n",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "disabled"
+}

@@ -9,3 +9,4 @@ secrets/
 .vagrant/
 caddy-root.crt
 docker-compose.debug.yml
+target/
