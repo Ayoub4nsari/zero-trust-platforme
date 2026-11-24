@@ -74,7 +74,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build et push
+        env:
+          OWNER: ${{ github.repository_owner }}
+          SERVICE: ${{ matrix.service }}
+          SHA: ${{ github.sha }}
         run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/zt-${{ matrix.service }}
-          docker build -t "$IMAGE:${{ github.sha }}" -t "$IMAGE:latest" services/${{ matrix.service }}
+          IMAGE="ghcr.io/${OWNER,,}/zt-${SERVICE}"
+          docker build -t "$IMAGE:$SHA" -t "$IMAGE:latest" "services/${SERVICE}"
           docker push "$IMAGE" --all-tags
